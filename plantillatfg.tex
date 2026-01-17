@@ -75,8 +75,8 @@
 % título alumno, titor y curso académico                                      %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\title{Transcripción Automática de Fechas con Whisper}
-\author{Gómez Corral, Miquel}
+\title{Resúmenes Automáticos Extractivos y Abstractivos}
+\author{André Pachedo, \\ Miquel Gómez}
 % \tutor{No}
 % \curs{MUIARFID}
 
@@ -133,234 +133,161 @@
 
 \mainmatter
 
-\chapter{Introducción}
-Este trabajo aborda el uso de modelos basados en transformers para la transcripción automática de fechas en formato textual. El modelo base a partir del cual se han construido las arquitecturas es Whisper, un modelo de reconocimiento automático del habla. 
+\chapter{Análisis de los Resultados}
 
-Todo el código relacionado con la implementación del modelo, ha sido provisto como material de la asignatura. El trabajo se ha basado en hacer uso de este a partir de modificaciones a nivel de preprocesamiento, tokenización, entrenamiento y evaluación.
+Los métodos generativos nos han ayudado a entender ...
+\section{Análisis de Rendimiento}
+% **TAREA:** Realiza un análisis **para cada una de las tablas** de resultados que incluya, como mínimo, la contestación a las siguientes preguntas. Se espera un análisis redactado (como en un artículo científico), no un *itemize*.
 
-\subsubsection{Hardware utilizado}
-Los experimentos se han realizado en mi máquina personal: GPU NVIDIA RTX 5070 (12 GB VRAM), procesador AMD Ryzen 9 9000X, 64 GB de RAM y Ubuntu 24.04 LTS.
+% 1. ¿Qué nos dicen los resultados de los Oráculos Extractivos?
+% 2. ¿Qué nos indican los resultados del método *naive* LEAD-3?
+% 3. ¿Crees que con un mejor método extractivo podríamos llegar a obtener una mejora notable?
+% 4. ¿Qué rendimiento tienen los métodos Extractivos (excluyendo LEAD-3) en los 4 aspectos?
+% 5. ¿Qué rendimiento tienen los modelos Sequence2Sequence en los 4 aspectos?
+% 6. ¿Qué rendimiento tienen los modelos Causales en los 4 aspectos?
+% 7. Comparando todos los tipos de métodos (sin incluir LEAD-3) ¿Qué método extractivo y qué modelo abstractivo son los más balanceados?
 
-Todos los modelos han podido ser entrenados y evaluados sin problemas. 
+Primero que todo, a partir de las tablas de resultados, los oráculos extractivos nos marcan el límite superior del rendimiento que podríamos esperar de cualquier método extractivo. Cuanto valoremos los resultados de los NO oráculos, tomaremos estos valores como referencia para entender el margen de mejora que podríamos tener.
 
-\section{Cambios principales}
-Para facilitar el uso del código base, se han realizado una serie de modificaciones.
+Por otro lado, el método Naive LEAD-3, nos sirve como una línea base simple para comparar los demás métodos y entender el dataset. Este nos dice cuenta información sobre los documentos se encuentra el las 3 primeras oraciones.
 
-\begin{itemize}
-  \item En los datasets en inglés, se ha encontrado la que frase \texttt{'tuesday thank you.'} aparece siempre con el punto al final. Por eliminar redundancias y mejorar la calidad de los datos, se ha decidido eliminar todos los signos de puntuación en el preprocesamiento.
-  \item Se han 'parametrizado' los principales elementos del código como las rutas, los tokens especiales (PAD, SOS, EOS) o algunos parámetros para facilitar cambios entre los ejercicios
-\end{itemize}
+En un principio, bajo estar definiciones y teniendo en cuenta que todas las métricas parten de una referencia, un método extractivo NO podría superar el rendimiento de los oráculos extractivos. Los métodos podrían acercarse mucho a estos oráculos, pero no superarlos. 
 
-\section{Notebooks entregados}
-Se han entregados 4 notebooks. A continuación la lista de los nombres con una breve descripción del contenido de cada uno.
-\begin{itemize}
-  \item \texttt{ejercicio-1-es.ipynb}: Ejercicio 1 en español.
-  \item \texttt{ejercicio-1-en.ipynb}: Ejercicio 1 en inglés.
-  \item \texttt{ejercicio-2.ipynb}: Ejercicio 2 (multilingüe con instrucciones).
-  \item \texttt{ejercicio-2-extra.ipynb}: Ejercicio 2 con implementación Top-K y Top-P en inferencia.
-  \item \texttt{ejercicio-3.ipynb}: Ejercicio 3 (llamada a funciones).
-\end{itemize}
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%                        Notebooks base                                     %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\chapter{Ejercicios}
-\section{Ejercicio 1: Modelos monolingües}
-En este ejercicio se ha creado la estructura principal de los Notebooks seguida por el resto de ejercicios.
-
-Como se ha mencionado, se han parametrizado las principales variables del código. Se ha detectado el problema con los signos de puntuación en inglés y se ha estructurado todo el procesamiento como se indica en el ejercicio.
-
-A la hora de entrenar los modelos, parecía que el modelo en español necesitamos algunos epochs más para entrenar. Tras 15 epochs para el modelo en español y 10 para el modelo en inglés, se han obtenido los siguientes resultados:
+\subsection{Dataset CNN/DailyMail}
 
 \begin{table}[H]
-\centering
-\begin{tabular}{lr}
-	\toprule
-	\textbf{Idioma} & \textbf{WER \%} \\
-	\midrule
-	Español & 1.36 \\
-	Inglés & 1.21 \\
-	\bottomrule
+\footnotesize
+  \centering
+\caption{Resultados de métricas automáticas para modelos extractivos y abstractivos (Tabla 1)}
+\label{tab:resultados_nlp_1}
+\begin{tabular}{lcccccccc}
+\toprule
+\textbf{Method} & \textbf{R-1} & \textbf{R-2} & \textbf{R-3} & \textbf{R-4} & \textbf{BS-r} & \textbf{BS-f} & \textbf{METEOR} & \textbf{CHRF} \\
+\midrule
+extractive-oracle-num-sents & \textbf{0.4617} & \textbf{0.2840} & \textbf{0.2155} & \textbf{0.1711} & \textbf{0.8792} & \textbf{0.8847} & \textbf{0.4165} & \textbf{47.7765} \\
+extractive-oracle-ratio     & \textbf{0.4646} & \textbf{0.2829} & \textbf{0.2126} & \textbf{0.1666} & \textbf{0.8834} & \textbf{0.8860} & \textbf{0.4371} & \textbf{50.7997} \\
+lead-3                      & 0.3788 & 0.1629 & 0.0931 & 0.0633 & 0.8695 & 0.8666 & 0.3683 & 42.8866 \\
+tex-trank                   & 0.3459 & 0.1526 & 0.0905 & 0.0637 & 0.8726 & 0.8625 & 0.3561 & 41.9320 \\
+lex-trank                   & 0.3473 & 0.1386 & 0.0764 & 0.0514 & 0.8672 & 0.8635 & 0.3301 & 39.4642 \\
+lsa                         & 0.3123 & 0.1196 & 0.0690 & 0.0470 & 0.8641 & 0.8540 & 0.3274 & 39.1290 \\
+bert-extractive             & 0.3321 & 0.1212 & 0.0649 & 0.0440 & 0.8637 & 0.8596 & 0.3184 & 38.7921 \\
+bart                        & \textbf{0.4298} & 0.2031 & 0.1231 & 0.0848 & 0.8778 & \textbf{0.8804} & \textbf{0.3880} & \textbf{44.1239} \\
+pegasus                     & 0.4209 & \textbf{0.2115} & \textbf{0.1297} & \textbf{0.0896} & \textbf{0.8827} & 0.8780 & 0.3580 & 41.6167 \\
+flan-t5                     & 0.3567 & 0.1481 & 0.0796 & 0.0490 & 0.8580 & 0.8689 & 0.2811 & 34.4151 \\
+gpt2                        & 0.1970 & 0.0322 & 0.0059 & 0.0017 & 0.8106 & 0.8149 & 0.1759 & 26.7276 \\
+llama3                      & 0.2287 & 0.0475 & 0.0135 & 0.0046 & 0.8384 & 0.8413 & 0.2150 & 30.0470 \\
+\bottomrule
 \end{tabular}
-\caption{Resultados en transcripción automática de fechas monolingüe: WER Inglés y Español.}
-\label{tab:wer_ej1}
 \end{table}
 
-\section{Ejercicio 2: Modelo multilingüe}
-Partiendo del código del ejercicio 1, se ha implementado un modelo multilingüe que recibe instrucciones para identificar el idioma de la entrada. De nuevo, se han limpiado los signos de puntuación en inglés, pero ahora, se han juntado los datasets de ambos idiomas para crear un dataset combinado con todas las combinaciones: Transcripción en español, Transcripción en inglés, Traducción del Inglés al Español y Traducción del Español al Inglés.
+\dots
 
-Se han añadido los tokens especiales para identificar el idioma de la entrada y salida, y se ha hecho que el dataset de entrenamiento ponga antes de cada frase el token correspondiente a la instrucción. Luego, para la generación, se añade el token de instrucción antes de entrar al bucle, justo después del token SOS.
+Los Métodos extractivos parecen ser métodos estables y robustos. Tiende a obtener buenos resultados en todos los aspectos, aunque no son los mejores en ninguno. Sobre todo, flaquean un poco en la fluidez. Algo normal en métodos extractivos porque solo juntan frases.
 
-Con esto, se han obtenido los siguientes resultados tras 10 epochs de entrenamiento:
-\begin{table}[H]
+Por otro lado, en los modelos Sequence2Sequence podemos agrupar en Bart y Pegasus por un lado, y el Flan-t5 por otro. Bart y Pegasus parecen tener el mejor rendimiento en todas las métricas. Sin embargo, Flan-t5 parece tener un rendimiento en comparación inferior.... .
+
+Esto algo esperado ya que Bart y Pegasus han sido finetuneados específicamente para la tarea de resumen automático EN ESTE DATASE, mientras que Flan-t5 es un modelo más generalista.
+
+Los modelos causales (GPT2 y Llama3) parecen tener un rendimiento bastante inferior a los demás métodos. Esto puede ser debido a que estos modelos no están tan especializados en la tarea de resumen automático como los otros modelos abstractivos. 
+
+
+Viendo, podemos decir que el método extractivo más balanceado es TextRank, ya que obtiene resultados decentes en todos los aspectos sin destacar especialmente en ninguno. 
+
+Por otro lado, Bart diríamos que en el modelo abstractivo más balanceado. Está empatado con Pegasus en dos métricas, pero en las que Pegasus le supera, no lo hace por mucho.
+
+\subsection{Dataset CLASum}
+\begin{table}[ht]
+  \footnotesize
 \centering
-\begin{tabular}{lr}
-	\toprule
-	\textbf{Idioma} & \textbf{WER \%} \\
-	\midrule
-	Bilingüe inglés y español & 4.20 \\
-	\bottomrule
-\end{tabular}
-\caption{Resultados en transcripción automática de fechas monolingüe: WER Inglés y Español.}
-\label{tab:wer_ej1}
+\caption{Resultados de métricas automáticas para modelos extractivos y abstractivos (Tabla 2)}
+\label{tab:resultados_nlp_2}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lcccccccc}
+\toprule
+\textbf{Method} & \textbf{R-1} & \textbf{R-2} & \textbf{R-3} & \textbf{R-4} & \textbf{BS-r} & \textbf{BS-f} & \textbf{METEOR} & \textbf{CHRF} \\
+\midrule
+extractive-oracle-num-sents & \textbf{0.4254} & \textbf{0.2731} & \textbf{0.2184} & \textbf{0.1840} & \textbf{0.8815} & \textbf{0.8870} & \textbf{0.3908} & \textbf{48.1411} \\
+extractive-oracle-ratio     & \textbf{0.4303} & \textbf{0.2779} & \textbf{0.2229} & \textbf{0.1872} & \textbf{0.8853} & \textbf{0.8881} & \textbf{0.4109} & \textbf{51.4000} \\
+lead-3                      & 0.3576 & 0.1615 & 0.1097 & 0.0871 & 0.8772 & 0.8711 & 0.3419 & \textbf{42.4826} \\
+tex-trank                   & 0.3187 & 0.1333 & 0.0861 & 0.0661 & 0.8754 & 0.8640 & 0.3398 & 39.5359 \\
+lex-trank                   & 0.3521 & 0.1530 & 0.0975 & 0.0734 & 0.8782 & 0.8710 & 0.3384 & 41.1056 \\
+lsa                         & 0.3102 & 0.1256 & 0.0806 & 0.0621 & 0.8733 & 0.8608 & 0.3325 & 39.2861 \\
+bert-extractive             & 0.3218 & 0.1228 & 0.0746 & 0.0549 & 0.8711 & 0.8631 & 0.3154 & 37.9083 \\
+bart                        & 0.3783 & 0.1818 & 0.1244 & 0.0984 & 0.8753 & 0.8770 & 0.3218 & 41.0940 \\
+pegasus                     & 0.3798 & 0.1904 & 0.1305 & \textbf{0.1012} & 0.8788 & 0.8712 & 0.3232 & 40.5537 \\
+flan-t5                     & \textbf{0.4187} & \textbf{0.2074} & \textbf{0.1341} & 0.0992 & \textbf{0.8793} & \textbf{0.8884} & \textbf{0.3348} & 40.2826 \\
+gpt2                        & 0.1870 & 0.0314 & 0.0063 & 0.0009 & 0.7380 & 0.7424 & 0.1466 & 22.9283 \\
+llama3                      & 0.2325 & 0.0500 & 0.0135 & 0.0042 & 0.7876 & 0.7927 & 0.1959 & 27.8445 \\
+\bottomrule
+\end{tabular}%
+}
 \end{table}
 
-Vemos que el rendimiento empeora de forma significative respecto a los modelos monolingües. Esto es algo esperado, ya que el modleo tiene que aprender a hacer 4 tareas diferentes (aun que parecidas) en lugar de una. Aún así el resultado es muy bueno.
+En este dataset, en el cual no se ha entrenado ningún modelo específicamente, los resultados son un poco diferentes.
 
-\section{Ejercicio 3: Llamadas a funciones}
-En este ejercicio de nuevo, parte del notebook creado en el ejercicio 1, y se ha hecho el mismo preprocesamiento que en los ejercicios anteriores.
+De primeras, es cierto que respecto a los métodos extractivos, el rendimiento es similar al del otro dataset. Sin embargo, en este caso, el método extractivo más balanceado sería LexRank, ya que obtiene mejores resultados que TextRank de forma consistente.
 
-Ahora, el tokenizador tiene más entrada, ya que tiene que manejar las palabras y las llamadas a funciones. Ya que la cantidad de opciones para llamar a funciones no era muy grande, se ha decidido que cada llamada a función, con su parámetro, sea un token único. Esto nos deja con tokens como:
+Ahora, si nos fijamos en los modelos abstractivos Sequence2Sequence, vemos que Flan-t5 obtiene los mejores resultados en casi todas las métricas. Esto es un cambio importante respecto al otro dataset, ya que Flan-t5 era el modelo con peor rendimiento.
 
-\noindent
-\begin{minipage}[t]{0.48\textwidth}
-\textbf{next\_day:}
-\begin{itemize}[topsep=0pt]
-  \item "next\_day('friday')"
-  \item "next\_day('monday')"
-  \item "next\_day('thursday')"
-  \item "next\_day('tuesday')"
-  \item "next\_day('wednesday')"
-\end{itemize}
-\end{minipage}
-\hfill
-\begin{minipage}[t]{0.48\textwidth}
-\textbf{relative\_day:}
-\begin{itemize}[topsep=0pt]
-  \item "relative\_day(+1)"
-  \item "relative\_day(+2)"
-  \item "relative\_day(+3)"
-\end{itemize}
-\end{minipage}
+El cambio de rendimiento de Flan-t5 puede ser debido a que este modelo es más generalista y no ha sido entrenado específicamente para el dataset CNN/DailyMail. Por lo tanto, en un dataset no visto, su rendimiento es mejor que el de los modelos más especializados como Bart y Pegasus.
 
-Luego, se ha hecho que el modelo aprenda a dar como salida el texto y estos tokens. Con el modelo entrenado, se han procesado sus predicciones para ejecutar las llamadas a funciones y obtener la fecha final. 
+Finalmente, los modelos causales (GPT2 y Llama3) siguen teniendo un rendimiento inferior al de los demás métodos, aunque en este caso, Llama3 obtiene mejores resultados que GPT2 en todas las métricas.
 
-Los resultados son muy buenos, equivocándose unicamente en 10 de 1000 ejemplos. or lo tanto, el error medio es de un 1.0 \%.
 
-\begin{table}[H]
+
+
+\section{Análisis de Comparativo}
+
+% **TAREA:** Realiza una comparativa de los distintos métodos de *summarization* y compara como varia el rendimiento entre datasets. Como mínimo, debe haber contestación a las siguientes preguntas. El análisis no debe ser un *itemize*.
+
+% 1. ¿Cómo varía cada método en cada uno de los aspectos? ¿Influye la variabilidad de en la abstractividad?
+% 2. En términos generarles, ¿Con que método de resumen os quedarías para trabajar con ambos datasets? ¿Variaría dependiendo en que aspecto deseasemos priorizar?
+
+1. ...
+
+Primero que todo, elegiríamos un método abstractivo. Entre ellos, es complicado decidir entre los tres, sin embargo, nos quedaríamos con Pegasus. 
+
+En el primer conjunto de datos, Pegasus y Bart tenían un rendimiento muy bueno por su ventaja de haber sido entrenados específicamente para este dataset. Luego, en este segundo dataset, Flan-t5 ha tenido un rendimiento muy bueno, pero Pegasus no se ha quedado muy atrás. 
+Este modelo ha obtenido resultados muy buenos en ambos datasets. A pesar de que no ha sido el mejor en ninguno, ha demostrado ser un modelo robusto y consistente. Parece ser el fácil de adaptar a distintos tipos de documentos y tareas en términos generales.
+
+
+\section{Impacto de la Abstractividad}
+
+% **TAREA:** En la tabla anterior puedes ver la tabla de correlaciones de "Kendall tau" entre el rendimiento global (media harmónica de todas las métricas) y el nivel de abstractividad de los resúmenes de referencia. Un nivel más bajo de abstractividad (1, por ejemplo) indicaría que el resumen de referencia es muy extractivo, mientras que un nivel más alto (5, por ejemplo) indicaría que el resumen de referencia es muy abstractivo. Teniendo esto presente, realiza un análsis en el que se contesten por lo menos a las siguientes preguntas:
+
+% 1. ¿Existe relación entre el rendimiento y el nivel de abstractividad de los resúmenes de referencia? En caso de haberla, ¿a qué crees que puede estar debido?
+% 2. ¿Tiene la misma relación entre rendimiento y nivel de abstractividad dependiendo de si son métodos extractivos o abstractivos? ¿Por qué?
+
+
+\begin{table}[ht]
 \centering
-\begin{tabular}{lr}
-	\toprule
-	\textbf{idioma} & \textbf{Error \%} \\
-	\midrule
-	Bilingüe Funciones & 1.00 \\
-	\bottomrule
+\caption{Correlaciones de Kendall Tau entre el rendimiento global y el nivel de abstractividad}
+\label{tab:abstractivity_correlations}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Method} & \textbf{Type} & \textbf{Aspect} & \textbf{Abs-Level Correlation} \\
+\midrule
+extractive-oracle-num-sents & extractive & performance & -0.625105 \\
+extractive-oracle-ratio & extractive & performance & -0.632635 \\
+lead-3 & extractive & performance & -0.614855 \\
+tex-trank & extractive & performance & -0.528799 \\
+lex-trank & extractive & performance & -0.503332 \\
+lsa & extractive & performance & -0.476109 \\
+bert-extractive & extractive & performance & -0.514631 \\
+bart & abstractive & performance & -0.543865 \\
+pegasus & abstractive & performance & -0.581181 \\
+flan-t5 & abstractive & performance & -0.450436 \\
+gpt2 & abstractive & performance & -0.064108 \\
+llama3 & abstractive & performance & -0.135576 \\
+\bottomrule
 \end{tabular}
-\caption{Resultados en transcripción automática de fechas monolingüe: WER Inglés y Español.}
-\label{tab:wer_ej1}
 \end{table}
 
+Teniendo esto presente, realiza un análsis en el que se contesten por lo menos a las siguientes preguntas:
 
-\section{Ejercicio Extra: Top-K y Top-P}
-Como ejercicios extra, se ha decidido hacer los dos primeros: implemntar Top-K y Top-P en la generación, y hacer un modelo multilingüe con instrucciones.
+1. Sí, negativo. El origen al que se le puede atribuir es que todas las métricas automáticas se basan en la comparación con los resúmenes de referencia. Por lo tanto, la abstractividad se verá penalizada. Si los resúmenes de referencia son muy extractivos, los métodos extractivos tendrán una ventaja al compararse con ellos, mientras que los métodos abstractivos podrían generar contenido que no esté presente en los resúmenes de referencia, lo que llevaría a una penalización en las métricas.
 
-Se ha partido del ejercicios dos para hacer estas modificaciones, ya que era el que más margen de mejora presentaba. Se ha vuelto a entrenar el modelo durante 10 epochs para tener una línea base con decodificación greedy, y se ha conseguido un WER de 3.87 \%, ligeramente mejor al original.
-
-La implementación estas estrategias de decodificación, pasa por cambiar el código del generate. 
-
-\begin{enumerate}
-  \item \textbf{Top-K:} Se parte de los logits, se ordenan de mayor a menor y se mantienen los K primeros. El resto de logits se descartan y se hace una softmax con los K logits restantes para obtener las probabilidades. Finalmente, se hace el muestreo a partir de estas probabilidades.
-  \item \textbf{Top-P:} Se parte de los logits, se aplica softmax para obtener las probabilidades, se ordenan de mayor a menor y se calcula la suma acumulada. Se mantienen los tokens hasta que la suma acumulada supere el umbral P. El resto de logits se ponen descartan y se hace una softmax y muestreo como en el caso anterior.
-\end{enumerate}
-
-Para ver el impacto de estas técnicas, se ha probado a decodificar el test con diferentes valores de K y P. La línea base con decodificación greedy obtuvo un WER de 3.87\%. Los resultados con Top-K y Top-P son los siguientes:
-
-\begin{table}[H]
-\centering
-\begin{minipage}[t]{0.48\textwidth}
-\centering
-\begin{tabular}{lr}
-	\toprule
-	\textbf{K} & \textbf{WER \%} \\
-	\midrule
-	1 & 3.87 \\
-	2 & 4.53 \\
-	3 & 4.23 \\
-	4 & 4.44 \\
-	5 & 4.60 \\
-	6 & 4.72 \\
-	7 & 4.39 \\
-	8 & 4.79 \\
-	9 & 4.23 \\
-	10 & 4.72 \\
-	\bottomrule
-\end{tabular}
-\caption{Resultados con Top-K.}
-\label{tab:topk}
-\end{minipage}
-\hfill
-\begin{minipage}[t]{0.48\textwidth}
-\centering
-\begin{tabular}{lr}
-	\toprule
-	\textbf{P (\%)} & \textbf{WER \%} \\
-	\midrule
-	10.0 & 3.87 \\
-	20.0 & 3.87 \\
-	30.0 & 4.51 \\
-	40.0 & 10.51 \\
-	50.0 & 34.32 \\
-	60.0 & 540.25 \\
-	70.0 & 589.45 \\
-	80.0 & 576.49 \\
-	90.0 & 538.15 \\
-	100.0 & 4.86 \\
-	\bottomrule
-\end{tabular}
-\caption{Resultados con Top-P.}
-\label{tab:topp}
-\end{minipage}
-\end{table}
-
-
-
-Cómo vemos. la estrategia ganadora sigue siendo la greedy. El Top-k=1 y top-p con poca masa de probabilidad se comportan de la misma forma que el greedy porque al menos ha de elegir un token, pero luego al aumentar la massa se vuelve un método nefasto. El top-k muestra más consistencia a lo largo de las ejecuciones, aun que no mejora al método greedy.
-
-La razón por la que esto puede ser así, es el simple hecho de que no hay tantos tokens como para que estrategias de este estilo valgan la pena. El modelo no tiende a confundir tokens (darles logits similares), por lo que usando la estrategia por defecto se consiguen los mejores resultados.
-
-
-\section{Resumen resultados}
-A continuación se muestran los resultados WER obtenidos en los diferentes ejercicios realizados:
-
-\begin{figure}[H]
-\centering
-\begin{tikzpicture}
-\begin{axis}[
-    ybar,
-    bar width=0.6cm,
-    width=\textwidth,
-    height=7.5cm,
-    ylabel={WER (\%)},
-    symbolic x coords={Español, Inglés, Bilingüe, Funciones, Greedy, Top-K=3, Top-P=30},
-    xtick=data,
-    x tick label style={font=\small},
-    ymin=0,
-    ymax=5,
-    ymajorgrids=true,
-    grid style=dashed,
-    enlarge x limits=0.15,
-    nodes near coords,
-    nodes near coords align={vertical},
-    every node near coord/.append style={font=\small},
-]
-
-% WER scores
-\addplot[fill=blue!60] coordinates {
-    (Español, 1.36)
-    (Inglés, 1.21)
-    (Bilingüe, 4.20)
-    (Funciones, 1.0)
-    (Greedy, 3.87)
-    (Top-K=3, 4.23)
-    (Top-P=30, 4.51)
-};
-
-\end{axis}
-\end{tikzpicture}
-\caption{Comparación de WER obtenido en cada ejercicio. Español e Inglés corresponden al Ejercicio 1, Bilingüe al Ejercicio 2, Funciones al Ejercicio 3, y Greedy Extra al ejercicio extra con decodificación greedy.}
-\label{fig:resultados_finales}
-\end{figure}
+2. Sí, tienden a tener la misma relación negativa...
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                                                                             %
@@ -372,7 +299,7 @@ A continuación se muestran los resultados WER obtenidos en los diferentes ejerc
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                                                                             %
-%                                 APÉNDICESS                                  %
+%                                 APÉNDICES                                  %
 %                                                                             %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
