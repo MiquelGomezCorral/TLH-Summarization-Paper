@@ -135,7 +135,10 @@
 
 \chapter{Análisis de los Resultados}
 
-Los métodos generativos nos han ayudado a entender ...
+En esta memoria se responde a las preguntas planteadas en la Práctica de Tecnologías del Lenguaje Humano (TLH) sobre los resultados obtenidos en el notebook sobre \textit{automatic summarization}.
+
+Se han utilizado LLMs para la interpretación inicial de los resultados con el objetivo de tener una primera idea. Luego, se han analizado de forma detallada y se han llegado a conclusiones propias. La redacción se ha hecho a mano, usando esto modelos como apoyo en la corrección del texto y el formato.
+
 \section{Análisis de Rendimiento}
 % **TAREA:** Realiza un análisis **para cada una de las tablas** de resultados que incluya, como mínimo, la contestación a las siguientes preguntas. Se espera un análisis redactado (como en un artículo científico), no un *itemize*.
 
@@ -147,11 +150,11 @@ Los métodos generativos nos han ayudado a entender ...
 % 6. ¿Qué rendimiento tienen los modelos Causales en los 4 aspectos?
 % 7. Comparando todos los tipos de métodos (sin incluir LEAD-3) ¿Qué método extractivo y qué modelo abstractivo son los más balanceados?
 
-Primero que todo, a partir de las tablas de resultados, los oráculos extractivos nos marcan el límite superior del rendimiento que podríamos esperar de cualquier método extractivo. Cuanto valoremos los resultados de los NO oráculos, tomaremos estos valores como referencia para entender el margen de mejora que podríamos tener.
+Primero que todo, basándonos en las tablas de resultados, podemos decir que los oráculos extractivos, marcan el máximo valor para las distintas métricas que los  métodos estudiados pueden alcanzar para cada dataset. A partir de estos valores, podremos saber cuanto margen de mejora tiene cada método. 
 
-Por otro lado, el método Naive LEAD-3, nos sirve como una línea base simple para comparar los demás métodos y entender el dataset. Este nos dice cuenta información sobre los documentos se encuentra el las 3 primeras oraciones.
+Por otra parte, el método \textit{naive} LEAD-3 nos permite caracterizar los datasets, indicando cuánta información relevante se encuentra en las tres primeras frases de los documentos. 
 
-En un principio, bajo estar definiciones y teniendo en cuenta que todas las métricas parten de una referencia, un método extractivo NO podría superar el rendimiento de los oráculos extractivos. Los métodos podrían acercarse mucho a estos oráculos, pero no superarlos. 
+Cabe destacar que, por definición, ningún método extractivo puede superar las métricas de los oráculos, ya que estos seleccionan la mejor combinación de frases basándose directamente en la referencia.
 
 \subsection{Dataset CNN/DailyMail}
 
@@ -180,20 +183,15 @@ llama3                      & 0.2287 & 0.0475 & 0.0135 & 0.0046 & 0.8384 & 0.841
 \end{tabular}
 \end{table}
 
-\dots
+Los métodos extractivos (TextRank, LexRank, LSA, BERT) muestran un comportamiento estable. Obtienen resultados competentes en todas las métricas, aunque no destacan en ninguno y tienen aún margen de mejora. Vemos que donde más fallan es en la coherencia, la consistencia tampoco es muy alta, exceptuando a TextRank, cuyo valor en BertScore-R es competitivo. Luego, para la fluidez, en comparación con los modelos abstractivos, los extractivos quedan claramente por detrás, mientras que en Relevancia tienen valores decentes.
 
-Los Métodos extractivos parecen ser métodos estables y robustos. Tiende a obtener buenos resultados en todos los aspectos, aunque no son los mejores en ninguno. Sobre todo, flaquean un poco en la fluidez. Algo normal en métodos extractivos porque solo juntan frases.
+En cuanto a los modelos \textit{Sequence2Sequence} abstractivos, observamos una clara distinción. BART y Pegasus ofrecen los mejores resultados en todas las métricas, distanciándose de los métodos extractivos en varias de ellas. Por ejemplo, hay una mejora notable en la coherencia, destacando Bart en la métrica de CHRF, obteniendo resultados cercanos al del oráculo. La consistencia también la mejoran considerablemente, llegando a mejorar Pegasus en BertScore-R al primer oráculo basado en el número de oraciones. Lo mismo ocurre con la fluidez, donde Bart consigue acercarse mucho al oráculo en la métrica de METEOR. Sin embargo, donde más sobresalen estos dos métodos es en la Relevancia, donde todas las métricas relacionadas con este aspecto (BertScore-F, METEOR y CHRF), reciben una mejora sustancial.
 
-Por otro lado, en los modelos Sequence2Sequence podemos agrupar en Bart y Pegasus por un lado, y el Flan-t5 por otro. Bart y Pegasus parecen tener el mejor rendimiento en todas las métricas. Sin embargo, Flan-t5 parece tener un rendimiento en comparación inferior.... .
+Por el contrario, Flan-T5 presenta un rendimiento inferior a estos dos, más cercano a los modelos extractivos. La razón de esto, radica en que BART y Pegasus han sido finetuneados en el dataset CNN/DailyMail, mientras que para Flan-T5 se desconoce si es así. En toda las métricas se queda cerca de los extractivos pero sin llegar a superarlos en ninguna, estando de forma consistente por debajo de ellos.
 
-Esto algo esperado ya que Bart y Pegasus han sido finetuneados específicamente para la tarea de resumen automático EN ESTE DATASE, mientras que Flan-t5 es un modelo más generalista.
+Finalmente, los modelos causales, GPT-2 y Llama-3, exhiben el rendimiento más bajo en las métricas automáticas. Como se profundizará en la sección de impacto de la abstractividad, esto no implica que sus resúmenes sean de mala calidad. La causa principal es su naturaleza generativa, ya que estos modelos tienden a parafrasear y utilizar 'sus propias palabras' mucho más que los modelos \textit{Sequence2Sequence}. Dado que la mayoría de métricas están basadas en comparaciones de n-gramas con la referencia, estos modelos son altamente penalizados al introducir nuevas formas de expresar la misma idea. Por todo esto, en los cuatro aspectos de Coherencia, Consistencia, Fluidez y Relevancia, los modelos causales quedan muy por debajo de los demás métodos.
 
-Los modelos causales (GPT2 y Llama3) parecen tener un rendimiento bastante inferior a los demás métodos. Esto puede ser debido a que estos modelos no están tan especializados en la tarea de resumen automático como los otros modelos abstractivos. 
-
-
-Viendo, podemos decir que el método extractivo más balanceado es TextRank, ya que obtiene resultados decentes en todos los aspectos sin destacar especialmente en ninguno. 
-
-Por otro lado, Bart diríamos que en el modelo abstractivo más balanceado. Está empatado con Pegasus en dos métricas, pero en las que Pegasus le supera, no lo hace por mucho.
+Viendo los resultados globales, podemos decir que el método extractivo más balanceado es TextRank, mientras que BART destaca como el modelo abstractivo más equilibrado, empatando con Pegasus en varias métricas y manteniendo una alta consistencia.
 
 \subsection{Dataset CLASum}
 \begin{table}[ht]
@@ -223,18 +221,21 @@ llama3                      & 0.2325 & 0.0500 & 0.0135 & 0.0042 & 0.7876 & 0.792
 }
 \end{table}
 
-En este dataset, en el cual no se ha entrenado ningún modelo específicamente, los resultados son un poco diferentes.
+En este dataset, el panorama cambia significativamente. Ya que ningún modelo ha sido entrenado específicamente en CLASum, los resultados reflejan mejor la capacidad de generalización de cada método.
 
-De primeras, es cierto que respecto a los métodos extractivos, el rendimiento es similar al del otro dataset. Sin embargo, en este caso, el método extractivo más balanceado sería LexRank, ya que obtiene mejores resultados que TextRank de forma consistente.
+Respecto a los métodos extractivos, aunque el rendimiento general empeora ligeramente, se mantiene la tendencia observada anteriormente, pero con LexRank destacando por encima del resto.
 
-Ahora, si nos fijamos en los modelos abstractivos Sequence2Sequence, vemos que Flan-t5 obtiene los mejores resultados en casi todas las métricas. Esto es un cambio importante respecto al otro dataset, ya que Flan-t5 era el modelo con peor rendimiento.
+El cambio más relevante ocurre en los modelos \textit{Sequence2Sequence}. Flan-T5 obtiene los mejores resultados en casi todas las métricas, superando a BART y Pegasus. Ahora, viendo los valores, las diferencias no son tan pronunciadas como en el dataset anterior, por lo que no se puede mensopreciar la capacidad de generalización de Bart y Pegasus. Todos obtienen resultados competitivos, pero Flan-T5 consigue los mejores valores en Relevancia (BertScore-F, METEOR) y en Consistencia (R-3, BertScore-R), mientras que Pegasus gana en Coherencia y Fluidez (R-4 y CHRF).
 
-El cambio de rendimiento de Flan-t5 puede ser debido a que este modelo es más generalista y no ha sido entrenado específicamente para el dataset CNN/DailyMail. Por lo tanto, en un dataset no visto, su rendimiento es mejor que el de los modelos más especializados como Bart y Pegasus.
-
-Finalmente, los modelos causales (GPT2 y Llama3) siguen teniendo un rendimiento inferior al de los demás métodos, aunque en este caso, Llama3 obtiene mejores resultados que GPT2 en todas las métricas.
+Finalmente, los modelos causales (GPT2 y Llama3) tienen resultados similares a los del datase anterior. Siguen teniendo un rendimiento inferior al de los demás métodos, aunque en este caso, Llama3 obtiene mejores resultados que GPT2 en todas las métricas. Por lo mencionado anteriormente, siguen en desventaja debido a su naturaleza generativa.
 
 
+\subsection{Comentario sobre los oráculos}
+En ambos datases, los métodos que no son muy abstactivos (extractivos y \textit{Sequence2Sequence}) se acercan bastante a los oráculos, especialmente en las métricas de Relevancia y Consistencia. también, si nos fijamos en el método naive LEAD-3, vemos que obtiene resultados decentes e incluso mejores que los demás métodos.
 
+Con todo esto, llegamos a la conclusión de que ambos datasets tienen un nivel de abstractividad bajo, y que los resúmenes, son en gran parte extractivos. Los oráculos marcan un límite alto, y el hecho de que los métodos extractivos y \textit{Sequence2Sequence} (que no son muy abstractivos) se acerquen tanto a ellos confirman esta teoría. Los resultados del LEAD-3 también apoyan esta idea.
+
+Por lo tanto, los dos métodos más abstractivos (modelos causales) están en clara desventaja, por todo lo comentado anteriormente.
 
 \section{Análisis de Comparativo}
 
@@ -242,14 +243,16 @@ Finalmente, los modelos causales (GPT2 y Llama3) siguen teniendo un rendimiento 
 
 % 1. ¿Cómo varía cada método en cada uno de los aspectos? ¿Influye la variabilidad de en la abstractividad?
 % 2. En términos generarles, ¿Con que método de resumen os quedarías para trabajar con ambos datasets? ¿Variaría dependiendo en que aspecto deseasemos priorizar?
+Comparando el comportamiento de los modelos entre los distintos datasets, observamos patrones muy diferenciados. Los métodos extractivos demuestran una gran estabilidad en todos los aspectos, manteniendo métricas consistentes tanto en CNN/DailyMail como en CLASum. Por el contrario, los modelos abstractivos Sequence2Sequence BART y Pegasus, empeoran bastante del primer corpus al segundo, su rendimiento en la relevancia y coherencia disminuyen notablemente. Ahora, el modelo Flan-T5, que no había sido finetuneado en ninguno de estos datasets, mejora en CLASum. Por último, los modelos causales GPT-2 y Llama-3 mantienen un rendimiento bajo en ambos datasets, con ligeras variaciones pero sin cambios significativos.
 
-1. ...
 
-Primero que todo, elegiríamos un método abstractivo. Entre ellos, es complicado decidir entre los tres, sin embargo, nos quedaríamos con Pegasus. 
+
+En este punto, si tuviéramos que elegir un método para trabajar en ambos datasets, elegiríamos un método abstractivo basado en modelos Sequence2Sequence. Entre ellos, es complicado decidir cual de los tres, sin embargo, nos quedaríamos con Pegasus. 
 
 En el primer conjunto de datos, Pegasus y Bart tenían un rendimiento muy bueno por su ventaja de haber sido entrenados específicamente para este dataset. Luego, en este segundo dataset, Flan-t5 ha tenido un rendimiento muy bueno, pero Pegasus no se ha quedado muy atrás. 
-Este modelo ha obtenido resultados muy buenos en ambos datasets. A pesar de que no ha sido el mejor en ninguno, ha demostrado ser un modelo robusto y consistente. Parece ser el fácil de adaptar a distintos tipos de documentos y tareas en términos generales.
+Este modelo ha obtenido resultados muy buenos en ambos datasets. A pesar de que no ha sido el mejor en ninguno, ha demostrado ser un modelo robusto y consistente. Parece ser el más fácil de adaptar a distintos tipos de documentos y tareas en términos generales.
 
+Además, hay que tener en cuenta los resúmenes que generan los modelos causales, que con las métricas usadas, que se apoyan en referencias extractivas, no se les está haciendo justicia. Por lo que habría que revisar las producciones de estos modelos mediante el juicio humano u otra métrica para valorar su calidad real.
 
 \section{Impacto de la Abstractividad}
 
@@ -257,7 +260,6 @@ Este modelo ha obtenido resultados muy buenos en ambos datasets. A pesar de que 
 
 % 1. ¿Existe relación entre el rendimiento y el nivel de abstractividad de los resúmenes de referencia? En caso de haberla, ¿a qué crees que puede estar debido?
 % 2. ¿Tiene la misma relación entre rendimiento y nivel de abstractividad dependiendo de si son métodos extractivos o abstractivos? ¿Por qué?
-
 
 \begin{table}[ht]
 \centering
@@ -283,11 +285,11 @@ llama3 & abstractive & performance & -0.135576 \\
 \end{tabular}
 \end{table}
 
-Teniendo esto presente, realiza un análsis en el que se contesten por lo menos a las siguientes preguntas:
+Viendo la tabla con las correlaciones de "Kendall tau", se apricia que existe una correlación negativa evidente entre el rendimiento y el nivel de abstractividad. Como se ha apuntado durante el análisis, esto es debido al diseño de las métricas automáticas, que se basan en referencias extractivas. Si los resúmenes de referencia se vuelven muy abstractos, se alejan del texto fuente, lo que penaliza a cualquier modelo que se ciña al texto original.
 
-1. Sí, negativo. El origen al que se le puede atribuir es que todas las métricas automáticas se basan en la comparación con los resúmenes de referencia. Por lo tanto, la abstractividad se verá penalizada. Si los resúmenes de referencia son muy extractivos, los métodos extractivos tendrán una ventaja al compararse con ellos, mientras que los métodos abstractivos podrían generar contenido que no esté presente en los resúmenes de referencia, lo que llevaría a una penalización en las métricas.
+Todos los métodos que presentan una correlación negativa relevante, son los extractivos y los modelos \textit{Sequence2Sequence}, mientras que los causales, tienen una correlación cercana a cero. 
 
-2. Sí, tienden a tener la misma relación negativa...
+Tal como se adelantó en el análisis de rendimiento, los modelos causales (GPT-2, Llama-3) presentan una correlación significativamente menor (cercana a cero) en valor absoluto. 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                                                                             %
